@@ -27,6 +27,8 @@ namespace MicroService4Net
         private Action<HttpConfiguration> _configure;
         private bool _useCors;
 
+        private bool _sslenable = false ;
+
         #endregion
 
         #region C'tor
@@ -41,6 +43,13 @@ namespace MicroService4Net
         public MicroService(string ipAddress, int port = 8080, string serviceDisplayName = null, string serviceName = null,
             Action<HttpConfiguration> configure = null, bool useCors = true)
         {
+            InitMicroService(ipAddress, port, serviceDisplayName, serviceName, configure, useCors);
+        }
+
+        public MicroService(string ipAddress, int port = 8080,bool SslEnable = false, string serviceDisplayName = null, string serviceName = null,
+            Action<HttpConfiguration> configure = null, bool useCors = true)
+        {
+            _sslenable = SslEnable;
             InitMicroService(ipAddress, port, serviceDisplayName, serviceName, configure, useCors);
         }
 
@@ -132,7 +141,15 @@ namespace MicroService4Net
 
         private void Start(Action<HttpConfiguration> configure, bool useCors)
         {
-            _selfHostServer = new SelfHostServer(_ipAddress, _port, true);
+            if(_sslenable == true )
+            {
+                _selfHostServer = new SelfHostServer(_ipAddress, _port,true, true);
+            }
+            else
+            {
+                _selfHostServer = new SelfHostServer(_ipAddress, _port,false, true);
+            }
+            
 
             _selfHostServer.Connect(configure, useCors);
             Console.WriteLine($"Service {_serviceDisplayName} started on {_ipAddress}:{_port}");

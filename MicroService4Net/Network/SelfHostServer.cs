@@ -19,9 +19,25 @@ namespace MicroService4Net.Network
 
         #region C'tor
 
+        public SelfHostServer(string ipaddress, int port,bool ssl, bool callControllersStaticConstractorsOnInit)
+        {
+            if(ssl==true)
+            {
+                _options = new StartOptions($"https://{ipaddress}:{port}");
+            }
+            else
+            {
+                _options = new StartOptions($"http://{ipaddress}:{port}");
+            }
+           
+
+            if (callControllersStaticConstractorsOnInit)
+                CallControllersStaticConstractors();
+        }
         public SelfHostServer(string ipaddress, int port, bool callControllersStaticConstractorsOnInit)
         {
-            _options = new StartOptions($"http://{ipaddress}:{port}");
+
+            _options = new StartOptions($"https://{ipaddress}:{port}");
 
             if (callControllersStaticConstractorsOnInit)
                 CallControllersStaticConstractors();
@@ -35,7 +51,9 @@ namespace MicroService4Net.Network
         {
             try
             {
-                _serverDisposable = WebApp.Start(_options, appBuilder => BuildApp(appBuilder, configure, useCors));
+                 
+
+                    _serverDisposable = WebApp.Start(_options, appBuilder => BuildApp(appBuilder, configure, useCors));
             }
             catch (Exception ex)
             {
@@ -46,6 +64,7 @@ namespace MicroService4Net.Network
         private static void BuildApp(IAppBuilder appBuilder, Action<HttpConfiguration> configure, bool useCors)
         {
             var config = new HttpConfiguration();
+           
 
             config.Formatters.Clear();
             config.Formatters.Add(new JsonMediaTypeFormatter());
@@ -58,6 +77,8 @@ namespace MicroService4Net.Network
             if (useCors)
                 appBuilder.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
 
+            
+            
             appBuilder.UseWebApi(config);
         }
 
